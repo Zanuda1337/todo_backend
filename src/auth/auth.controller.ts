@@ -8,7 +8,6 @@ import {
   Put,
   Res,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -24,7 +23,6 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { Response } from 'express';
-import { ValidationPipe } from '../pipes/validation.pipe';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -33,7 +31,6 @@ export class AuthController {
 
   @Post('/registration')
   @Public()
-  @UsePipes(ValidationPipe)
   @ApiConflictResponse({ status: HttpStatus.CONFLICT, description: 'Пользователь с таким Email уже существует', })
   @ApiBadRequestResponse({ status: HttpStatus.BAD_REQUEST, description: 'Некорректные данные', })
   @ApiCreatedResponse({ status: HttpStatus.CREATED, description: 'Пользователь создан', })
@@ -42,6 +39,7 @@ export class AuthController {
     @Body() userDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ access_token: string }> {
+    console.log(userDto)
     const { access_token, refresh_token } = await this.authService.registration(
       userDto,
     );

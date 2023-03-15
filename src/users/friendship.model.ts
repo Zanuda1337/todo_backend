@@ -8,8 +8,13 @@ import {
 } from 'sequelize-typescript';
 import { User } from './users.model';
 
+interface friendshipCreationAttrs {
+  senderId: string;
+  recipientId: string
+}
+
 @Table({ tableName: 'friendship', createdAt: false, updatedAt: false })
-export class Friendship extends Model<Friendship> {
+export class Friendship extends Model<Friendship, friendshipCreationAttrs> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
