@@ -17,6 +17,6 @@ export class CreateUserDto {
 
   @ApiProperty({ example: '123456' })
   @IsString({message: 'SHOULD_BE_STRING'})
-  @Length(4, 16, {message: "MORE_THAN_4_AND_LESS_THAN_16"})
+  @Length(4, 16, {message: "SHOULD_BE_MORE_THAN_4_AND_LESS_THAN_16"})
   readonly password: string;
 }

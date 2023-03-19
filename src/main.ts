@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from './pipes/validation.pipe';
+import { SocketIoAdapter } from './adapters/socket-io-adapter';
 
 const start = async () => {
   try {
@@ -12,6 +13,7 @@ const start = async () => {
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, always: true, forbidNonWhitelisted: true }),
     );
+    app.useWebSocketAdapter(new SocketIoAdapter(app))
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Explore the API')
       .setDescription('This is an API for Todo List')

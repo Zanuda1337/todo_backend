@@ -43,10 +43,10 @@ export class Category extends Model<Category, ICategoryCreationAttrs> {
   color: string;
 
   // @ApiProperty({ example: '2023-03-05T17:45:22.817Z'})
-  createdAt: string;
+  // createdAt: string;
 
   // @ApiProperty({ example: '2023-03-05T17:45:22.817Z'})
-  updatedAt: string;
+  // updatedAt: string;
 
   @BelongsTo(() => User)
   creator: User;

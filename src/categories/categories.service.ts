@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Category } from './categories.model';
 import { UserCategories } from './user-categories.model';
 import { Sequelize } from 'sequelize-typescript';
-import { FindAttributeOptions, GroupOption, Op } from 'sequelize';
+import { FindAttributeOptions, GroupOption} from 'sequelize';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/users.model';
+import { UpdateCategoryDto } from './dto/update-category,dto';
 
 @Injectable()
 export class CategoriesService {
@@ -51,20 +51,37 @@ export class CategoriesService {
     ];
   }
 
-  async create(dto: CreateCategoryDto) {
+  async create(dto: CreateCategoryDto, userId: string) {
     const category = await this.categoryRepository.create({
       name: dto.name,
       color: dto.color,
-      creatorId: '0ca7c5a5-42eb-4a79-bcbc-b1c3ed76623f',
+      creatorId: userId,
     });
-    const memberIds = dto.memberIds
-      ? [...dto.memberIds, '0ca7c5a5-42eb-4a79-bcbc-b1c3ed76623f']
-      : ['0ca7c5a5-42eb-4a79-bcbc-b1c3ed76623f'];
+    const memberIds = dto.memberIds ? [...dto.memberIds, userId] : [userId];
     await category.$set('members', memberIds);
     return category;
   }
 
-  async getCategoryById(id: string) {
+  async update(dto: UpdateCategoryDto, userId: string): Promise<any> {
+    if (!dto.name && !dto.color && !dto.memberIds)
+      throw new HttpException('NO_ARGUMENTS', HttpStatus.BAD_REQUEST);
+    const category = await this.categoryRepository.findOne(
+      { where: { id: dto.id, creatorId: userId} },
+    );
+    if (!category)
+      throw new HttpException('CATEGORY_DOESNT_EXIST', HttpStatus.BAD_REQUEST);
+    if (dto.name) category.name = dto.name
+    if (dto.color) category.color = dto.color
+    if (dto.memberIds) {
+      const memberIds =
+        dto.memberIds.length !== 0 ? [...dto.memberIds, userId] : [userId];
+      await category.$set('members', memberIds);
+    }
+    await category.save();
+    return category;
+  }
+
+  async getCategoryById(id: string, userId: string) {
     const category = await this.userCategoryRepository.findOne({
       attributes: this.categoryAttrs,
       where: { categoryId: id },
@@ -75,15 +92,15 @@ export class CategoriesService {
       raw: true,
       group: this.categoryGroup,
       having: Sequelize.literal(
-        `bool_or(true) FILTER (WHERE "members"."id" = ${'0ca7c5a5-42eb-4a79-bcbc-b1c3ed76623f'})`,
+        `bool_or(true) FILTER (WHERE "members"."id" = '${userId}')`,
       ),
       order: Sequelize.literal('category.id ASC'),
     });
     return category;
   }
 
-  async getAll() {
-    return  await this.userCategoryRepository.findAll({
+  async getAll(id: string) {
+    return await this.userCategoryRepository.findAll({
       attributes: this.categoryAttrs,
       include: [
         { association: 'category', attributes: [], required: true },
@@ -92,7 +109,7 @@ export class CategoriesService {
       raw: true,
       group: this.categoryGroup,
       having: Sequelize.literal(
-        `bool_or(true) FILTER (WHERE "members"."id"::text = '${'0ca7c5a5-42eb-4a79-bcbc-b1c3ed76623f'}')`,
+        `bool_or(true) FILTER (WHERE "members"."id"::text = '${id}')`,
       ),
       order: Sequelize.literal('category.id ASC'),
     });

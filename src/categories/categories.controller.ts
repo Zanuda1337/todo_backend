@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param, Patch,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -8,26 +16,44 @@ import {
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './categories.model';
+import { GetCurrentUserId } from '../auth/common/decorators';
+import { UpdateCategoryDto } from './dto/update-category,dto';
 
 @ApiTags('categories')
 @Controller('/categories')
 export class CategoriesController {
   constructor(private categoryService: CategoriesService) {}
 
+  @HttpCode(201)
   @ApiBearerAuth('access_token')
   @ApiOperation({ summary: 'Создание категории' })
   @ApiResponse({ status: HttpStatus.CREATED, type: Category })
   @Post()
-  create(@Body() dto: CreateCategoryDto) {
-    return this.categoryService.create(dto);
+  create(
+    @Body() dto: CreateCategoryDto,
+    @GetCurrentUserId() currentUserId: string,
+  ) {
+    return this.categoryService.create(dto, currentUserId);
+  }
+
+  @HttpCode(200)
+  @ApiBearerAuth('access_token')
+  @ApiOperation({ summary: 'Обновление категории' })
+  @ApiResponse({ status: HttpStatus.OK, type: Category })
+  @Patch()
+  update(
+    @Body() dto: UpdateCategoryDto,
+    @GetCurrentUserId() currentUserId: string,
+  ) {
+    return this.categoryService.update(dto, currentUserId);
   }
 
   @ApiBearerAuth('access_token')
   @ApiOperation({ summary: 'Получить категорию текущего пользователя по id' })
   @ApiResponse({ status: HttpStatus.OK, type: Category })
   @Get('/:id')
-  getOne(@Param('id') id: string) {
-    return this.categoryService.getCategoryById(id);
+  getOne(@Param('id') id: string, @GetCurrentUserId() currentUserId: string,) {
+    return this.categoryService.getCategoryById(id, currentUserId);
   }
 
   @ApiBearerAuth('access_token')
@@ -37,7 +63,7 @@ export class CategoriesController {
   })
   @ApiResponse({ status: HttpStatus.OK, type: [Category] })
   @Get()
-  getAll() {
-    return this.categoryService.getAll();
+  getAll(@GetCurrentUserId() currentUserId: string) {
+    return this.categoryService.getAll(currentUserId);
   }
 }

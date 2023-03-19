@@ -20,7 +20,7 @@ import {
 import { User } from './users.model';
 import { GetCurrentUserId } from '../auth/common/decorators';
 import { FindByEmailParam } from './types/findByEmailParam';
-import { FindByIdParam } from '../auth/types/findByIdParam';
+import { FindByIdParam } from '../auth/common/types/findByIdParam';
 
 @ApiTags('users')
 @Controller('/users')
@@ -65,8 +65,8 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Отправить заявку в друзья' })
   @ApiBearerAuth('access_token')
-  @HttpCode(201)
-  @ApiResponse({ status: 201, description: 'Успешно' })
+  @HttpCode(204)
+  @ApiResponse({ status: 204, description: 'Успешно' })
   @ApiNotFoundResponse({
     description: 'USER_DOESNT_EXIST - пользователь не существует',
   })
