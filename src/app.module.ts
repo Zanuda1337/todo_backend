@@ -25,7 +25,8 @@ import { Friendship } from './users/friendship.model';
       models: [User, Category, UserCategories, Friendship],
       autoLoadModels: true,
       dialectOptions: {
-        ssl: false,
+        connectionString: process.env.CONNECTION_STRING,
+        rejectUnauthorized: false
       }
     }),
     AuthModule,
