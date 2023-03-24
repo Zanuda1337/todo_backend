@@ -14,7 +14,10 @@ import { Friendship } from './users/friendship.model';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: `.${process.env.NODE_ENV}.env` }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.${process.env.NODE_ENV}.env`,
+    }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.POSTGRES_HOST,
@@ -25,17 +28,18 @@ import { Friendship } from './users/friendship.model';
       models: [User, Category, UserCategories, Friendship],
       autoLoadModels: true,
       dialectOptions: {
-        connectionString: process.env.CONNECTION_STRING,
-        rejectUnauthorized: false
-      }
+        ssl: {
+          connectionString: process.env.CONNECTION_STRING,
+          rejectUnauthorized: false,
+          require: true
+        },
+      },
     }),
     AuthModule,
     UsersModule,
     CategoriesModule,
     TasksModule,
   ],
-  providers: [{provide: APP_GUARD, useClass: AtGuard}]
+  providers: [{ provide: APP_GUARD, useClass: AtGuard }],
 })
-export class AppModule {
-
-}
+export class AppModule {}
