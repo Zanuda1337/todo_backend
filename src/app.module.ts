@@ -24,6 +24,9 @@ import { Friendship } from './users/friendship.model';
       database: process.env.POSTGRES_DATABASE,
       models: [User, Category, UserCategories, Friendship],
       autoLoadModels: true,
+      dialectOptions: {
+        ssl: false,
+      }
     }),
     AuthModule,
     UsersModule,
