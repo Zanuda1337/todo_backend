@@ -83,13 +83,21 @@ export class UsersService {
     });
   }
 
-  async getFriends(userId: string) {
+  async getUsers(userId: string) {
     return await this.friendshipRepository.findAll({
       attributes: {
-        include: this.getWithoutPrefixAttrs([
-          ...this.recipientAttrs,
-          ...this.senderAttrs,
-        ]),
+        include: [
+          ...this.getWithoutPrefixAttrs([
+            ...this.recipientAttrs,
+            ...this.senderAttrs,
+          ]),
+          [
+            Sequelize.literal(
+              `CASE WHEN "Friendship"."recipientId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' AND "Friendship"."accepted" = false THEN 'pending'WHEN "Friendship"."senderId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' AND "Friendship"."accepted" = false THEN 'outgoing'WHEN "Friendship"."senderId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' OR "Friendship"."recipientId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' AND "Friendship"."accepted" = true THEN 'friends' END`,
+            ),
+            'status',
+          ],
+        ],
         exclude: ['id', 'recipientId', 'senderId', 'accepted'],
       },
       include: {
@@ -104,14 +112,14 @@ export class UsersService {
             { senderId: { [Op.eq]: userId } },
           ],
         },
-        { accepted: true },
       ],
     });
   }
 
   async addRelation(myId: string, email: string) {
     const user = await this.getUserByEmail(email);
-    if(!user) throw new HttpException('USER_DOESNT_EXIST', HttpStatus.NOT_FOUND);
+    if (!user)
+      throw new HttpException('USER_DOESNT_EXIST', HttpStatus.NOT_FOUND);
     if (myId === user.id)
       throw new HttpException('SELF_FRIEND_REQUEST', HttpStatus.BAD_REQUEST);
     const relation = await this.findRelationWithUsers(myId, user.id);
@@ -155,8 +163,9 @@ export class UsersService {
         },
       },
     });
-    if(!relation) throw new HttpException('RELATION_DOESNT_EXIST', HttpStatus.NOT_FOUND);
-    await relation.destroy()
+    if (!relation)
+      throw new HttpException('RELATION_DOESNT_EXIST', HttpStatus.NOT_FOUND);
+    await relation.destroy();
   }
 
   private async findRelationWithUsers(senderId, recipientId) {

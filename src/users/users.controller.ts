@@ -28,39 +28,21 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @HttpCode(200)
-  @ApiOperation({ summary: 'Получить всех пользователей' })
+  @ApiOperation({ summary: 'Получить абсолютно всех пользователей (нужно для облегчения разработки, вскоре будет удалено)' })
   @ApiResponse({ status: 200, type: [User] })
   @ApiBearerAuth('access_token')
-  @Get()
+  @Get('test')
   getAll() {
     return this.usersService.getAll();
   }
 
   @HttpCode(200)
-  @ApiOperation({ summary: 'Получить всех пользователей, которые отправили вам заявку в друзья' })
+  @ApiOperation({ summary: 'Получить всех пользователей, с которыми есть отношения' })
   @ApiResponse({ status: 200, type: [User], description: 'Успешно' })
   @ApiBearerAuth('access_token')
-  @Get('pending')
-  getAllPending(@GetCurrentUserId() userId: string) {
-    return this.usersService.getAllPending(userId);
-  }
-
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Получить всех пользователей, которым вы отправили заявку в друзья' })
-  @ApiResponse({ status: 200, type: [User], description: 'Успешно' })
-  @ApiBearerAuth('access_token')
-  @Get('outgoing')
-  getAllOutgoing(@GetCurrentUserId() userId: string) {
-    return this.usersService.getAllOutgoing(userId);
-  }
-
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Получить всех своих друзей' })
-  @ApiResponse({ status: 200, type: [User], description: 'Успешно' })
-  @ApiBearerAuth('access_token')
-  @Get('friends')
-  getAllFriends(@GetCurrentUserId() userId: string) {
-    return this.usersService.getFriends(userId);
+  @Get()
+  getUsers(@GetCurrentUserId() userId: string) {
+    return this.usersService.getUsers(userId);
   }
 
   @ApiOperation({ summary: 'Отправить заявку в друзья' })
@@ -78,7 +60,7 @@ export class UsersController {
     description:
       'ALREADY_FRIENDS - пользователь уже является другом, ALREADY_SENT - запрос на дружбу уже отправлен, ALREADY_RECEIVED - запрос на дружбу уже получен',
   })
-  @Post('friends/:email')
+  @Post('relations/:email')
   addFriend(
     @Param() { email }: FindByEmailParam,
     @GetCurrentUserId() currentUserId: string,
@@ -89,7 +71,7 @@ export class UsersController {
   @HttpCode(204)
   @ApiParam({name: 'id'})
   @ApiBearerAuth('access_token')
-  @Put('friends/:id')
+  @Put('relations/:id')
   @ApiResponse({ status: 204, description: 'Успешно' })
   @ApiBadRequestResponse({
     description: 'INCORRECT_DATA - некорректные данные',
@@ -119,7 +101,7 @@ export class UsersController {
     description: 'INCORRECT_DATA - некорректные данные',
   })
   @ApiBearerAuth('access_token')
-  @Delete('friends/:id')
+  @Delete('relations/:id')
   deleteFriend(
     @Param() { id }: FindByIdParam,
     @GetCurrentUserId() currentUserId: string,
