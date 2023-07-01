@@ -9,12 +9,16 @@ const start = async () => {
   try {
     const PORT = process.env.PORT || 5000;
     const app = await NestFactory.create(AppModule);
-    app.enableCors();
+    app.enableCors({ credentials: true });
     app.use(cookieParser());
     app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, always: true, forbidNonWhitelisted: true }),
+      new ValidationPipe({
+        whitelist: true,
+        always: true,
+        forbidNonWhitelisted: true,
+      }),
     );
-    app.useWebSocketAdapter(new SocketIoAdapter(app))
+    app.useWebSocketAdapter(new SocketIoAdapter(app));
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Explore the API')
       .setDescription('This is an API for Todo List')
@@ -31,7 +35,13 @@ const start = async () => {
       )
       .addCookieAuth(
         'refresh_token',
-        { type: 'http', in: 'header', scheme: 'Bearer',bearerFormat: 'JWT', name:'refresh_token' },
+        {
+          type: 'http',
+          in: 'header',
+          scheme: 'Bearer',
+          bearerFormat: 'JWT',
+          name: 'refresh_token',
+        },
         'refresh_token',
       )
       .build();
