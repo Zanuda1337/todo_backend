@@ -1,7 +1,7 @@
 import {
   Body,
   Controller,
-  Delete,
+  Delete, Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -14,20 +14,34 @@ import {
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCookieAuth,
-  ApiCreatedResponse,
+  ApiCreatedResponse, ApiOperation, ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { RtGuard } from './common/guards';
-import { Cookies, GetCurrentUser, Public } from './common/decorators';
+import {
+  Cookies,
+  GetCurrentUserId,
+  Public,
+} from './common/decorators';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { Response } from 'express';
+import { User } from '../users/users.model';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Получить текущего пользователя' })
+  @ApiResponse({ status: 200, type: User, description: 'Успешно' })
+  @ApiBearerAuth('access_token')
+  @Get('/me')
+  me(@GetCurrentUserId() userId: string) {
+    return this.authService.me(userId);
+  }
 
   @Post('/registration')
   @Public()
@@ -35,11 +49,11 @@ export class AuthController {
   @ApiBadRequestResponse({ status: HttpStatus.BAD_REQUEST, description: 'Некорректные данные', })
   @ApiCreatedResponse({ status: HttpStatus.CREATED, description: 'Пользователь создан', })
   @HttpCode(HttpStatus.CREATED)
+
   async registration(
     @Body() userDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ access_token: string }> {
-    console.log(userDto)
     const { access_token, refresh_token } = await this.authService.registration(
       userDto,
     );
@@ -62,21 +76,25 @@ export class AuthController {
   }
 
   @Put('/refresh')
+  @ApiOperation({ summary: 'Обновить refresh_token и получить новую пару токенов' })
   @Public()
   @UseGuards(RtGuard)
   @ApiCookieAuth('refresh_token')
   @HttpCode(HttpStatus.OK)
-  refresh(
-    @GetCurrentUser() user,
+  async refresh(
     @Cookies('refresh_token') refreshToken: string,
+    @Res({ passthrough: true }) res: Response
   ) {
-    return this.authService.refresh(user.id, refreshToken);
+    const { access_token, refresh_token } = await this.authService.refresh(refreshToken);
+    res.cookie('refresh_token', refresh_token, { httpOnly: true });
+    return { access_token };
   }
 
   @Delete('/logout')
   @ApiBearerAuth('access_token')
   @HttpCode(HttpStatus.OK)
-  logout(@GetCurrentUser() user) {
-    return this.authService.logout(user.id);
+  logout(@GetCurrentUserId() userId) {
+    console.log(userId)
+    return this.authService.logout(userId);
   }
 }

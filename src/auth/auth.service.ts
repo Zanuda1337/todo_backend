@@ -19,6 +19,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  async me(userId: string) {
+      return await this.usersService.getUserById(userId)
+  }
   async registration(dto: CreateUserDto): Promise<Tokens> {
     const candidate = await this.usersService.getUserByEmail(dto.email);
     if (candidate) {
@@ -45,8 +48,9 @@ export class AuthService {
     await this.clearRtHash(userId);
   }
 
-  async refresh(userId: string, rt: string) {
-    const user = await this.usersService.getUserById(userId);
+  async refresh(rt: string) {
+    const { id } = this.jwtService.verify(rt, {secret: process.env.RT_SECRET})
+    const user = await this.usersService.getUserByIdWithRt(id);
     if (!user || !user.hashedRt) throw new ForbiddenException('ACCESS_DENIED');
     const rtMatches = await bcrypt.compare(rt, user.hashedRt);
     if (!rtMatches) throw new ForbiddenException('ACCESS_DENIED');
@@ -59,12 +63,11 @@ export class AuthService {
     const payload = { id: user.id, email: user.email };
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        // expiresIn: 60 * 15,
-        expiresIn: 60 * 60 * 24,
+        expiresIn: process.env.AT_EXPIRE,
         secret: process.env.AT_SECRET,
       }),
       this.jwtService.signAsync(payload, {
-        expiresIn: 60 * 60 * 24 * 7,
+        expiresIn: process.env.RT_EXPIRE,
         secret: process.env.RT_SECRET,
       }),
     ]);

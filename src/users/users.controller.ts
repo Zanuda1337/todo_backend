@@ -5,7 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
-  Put,
+  Put
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {

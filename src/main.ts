@@ -30,8 +30,8 @@ const start = async () => {
         'access_token',
       )
       .addCookieAuth(
-        'cookie-auth',
-        { type: 'http', in: 'Header', scheme: 'Bearer' },
+        'refresh_token',
+        { type: 'http', in: 'header', scheme: 'Bearer',bearerFormat: 'JWT', name:'refresh_token' },
         'refresh_token',
       )
       .build();

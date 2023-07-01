@@ -47,7 +47,13 @@ export class UsersService {
   async getUserById(id: string) {
     return await this.userRepository.findOne({
       where: { id },
-      attributes: { exclude: this.excludedAttrs },
+      attributes: { exclude: [...this.excludedAttrs, 'password', 'hashedRt'] },
+    });
+  }
+  async getUserByIdWithRt(id: string) {
+    return await this.userRepository.findOne({
+      where: { id },
+      attributes: { exclude: [...this.excludedAttrs, 'password'] },
     });
   }
 
