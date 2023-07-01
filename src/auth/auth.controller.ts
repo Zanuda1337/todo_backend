@@ -57,7 +57,7 @@ export class AuthController {
     const { access_token, refresh_token } = await this.authService.registration(
       userDto,
     );
-    res.cookie('refresh_token', refresh_token, { httpOnly: true, sameSite: 'none', secure: true, domain: 'localhost' });
+    res.cookie('refresh_token', refresh_token, { httpOnly: true, domain: 'localhost' });
     return { access_token };
   }
 
@@ -71,7 +71,7 @@ export class AuthController {
     const { access_token, refresh_token } = await this.authService.login(
       userDto,
     );
-    res.cookie('refresh_token', refresh_token, { httpOnly: true, sameSite: 'none', secure: true, domain: 'localhost' });
+    res.cookie('refresh_token', refresh_token, { httpOnly: true, domain: 'localhost' });
     return { access_token };
   }
 
@@ -86,7 +86,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { access_token, refresh_token } = await this.authService.refresh(refreshToken);
-    res.cookie('refresh_token', refresh_token, { httpOnly: true, sameSite: 'none', secure: true, domain: 'localhost' });
+    res.cookie('refresh_token', refresh_token, { httpOnly: true, domain: 'localhost' });
     return { access_token };
   }
 
