@@ -34,8 +34,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
   private cookieOptions: CookieOptions = {
     httpOnly: true,
-    sameSite: 'none',
-    secure: true,
+    // sameSite: 'none',
+    // secure: true,
     maxAge: +process.env.RT_EXPIRE,
   }
   @HttpCode(200)
