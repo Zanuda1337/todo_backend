@@ -37,7 +37,7 @@ export class AuthController {
     sameSite: 'none',
     secure: true,
     maxAge: +process.env.RT_EXPIRE,
-    domain: 'localhost'
+    domain: '.dev.localhost'
   }
 
   @HttpCode(200)
