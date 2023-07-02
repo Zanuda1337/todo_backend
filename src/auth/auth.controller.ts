@@ -37,6 +37,7 @@ export class AuthController {
     sameSite: 'none',
     secure: true,
     maxAge: +process.env.RT_EXPIRE,
+    domain: 'localhost'
   }
 
   @HttpCode(200)
@@ -70,7 +71,7 @@ export class AuthController {
     const { access_token, refresh_token } = await this.authService.registration(
       userDto,
     );
-    res.cookie('_refresh_token', refresh_token, this.cookieOptions);
+    res.cookie('refresh_token', refresh_token, this.cookieOptions);
     return { access_token };
   }
 
@@ -84,7 +85,7 @@ export class AuthController {
     const { access_token, refresh_token } = await this.authService.login(
       userDto,
     );
-    res.cookie('_refresh_token', refresh_token, this.cookieOptions);
+    res.cookie('refresh_token', refresh_token, this.cookieOptions);
     return { access_token };
   }
 
@@ -103,7 +104,7 @@ export class AuthController {
     const { access_token, refresh_token } = await this.authService.refresh(
       refreshToken,
     );
-    res.cookie('_refresh_token', refresh_token, this.cookieOptions);
+    res.cookie('refresh_token', refresh_token, this.cookieOptions);
     return { access_token };
   }
 

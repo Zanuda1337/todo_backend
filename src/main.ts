@@ -13,14 +13,6 @@ const start = async () => {
       credentials: true,
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
       origin: true,
-      // allowedHeaders: [
-      //   'Origin',
-      //   'X-Requested-With',
-      //   'Content-Type',
-      //   'Accept',
-      //   'API-KEY',
-      // ],
-
     });
     app.use(cookieParser());
     app.useGlobalPipes(
