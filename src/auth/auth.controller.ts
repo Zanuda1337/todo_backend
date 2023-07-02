@@ -37,9 +37,7 @@ export class AuthController {
     sameSite: 'none',
     secure: true,
     maxAge: +process.env.RT_EXPIRE,
-    domain: '.dev.localhost'
   }
-
   @HttpCode(200)
   @ApiOperation({ summary: 'Получить текущего пользователя' })
   @ApiResponse({ status: 200, type: User, description: 'Успешно' })
