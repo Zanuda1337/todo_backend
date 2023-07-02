@@ -4,14 +4,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from './pipes/validation.pipe';
 import { SocketIoAdapter } from './adapters/socket-io-adapter';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const start = async () => {
   try {
     const PORT = process.env.PORT || 5000;
     const app = await NestFactory.create(AppModule);
     app.enableCors({
-      allowedHeaders: ['Set-Cookie', 'X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept'],
+      allowedHeaders: ['Set-Cookie', 'X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Authorization'],
       credentials: true,
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
       origin: process.env.FRONTEND_URL,
