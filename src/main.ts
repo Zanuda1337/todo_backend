@@ -10,16 +10,15 @@ const start = async () => {
   try {
     const PORT = process.env.PORT || 5000;
     const app = await NestFactory.create(AppModule);
-    // app.setGlobalPrefix('api');
-    app.use(
-      createProxyMiddleware('/api',{
-        target: 'http://localhost:5050',
-        changeOrigin: true,
-        pathRewrite: {
-          [`^/api`]: '/'
-        }
-      }),
-    );
+    // app.use(
+    //   createProxyMiddleware('/api',{
+    //     target: 'http://localhost:5050',
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       [`^/api`]: '/'
+    //     }
+    //   }),
+    // );
     app.enableCors({
       credentials: true,
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
@@ -61,7 +60,7 @@ const start = async () => {
       )
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('/docs', app, document);
+    SwaggerModule.setup('/api/docs', app, document);
 
     await app.listen(PORT, () => `Server started on port ${PORT}`);
   } catch (e) {
