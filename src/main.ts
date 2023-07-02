@@ -10,20 +10,11 @@ const start = async () => {
   try {
     const PORT = process.env.PORT || 5000;
     const app = await NestFactory.create(AppModule);
-    // app.use(
-    //   createProxyMiddleware('/api',{
-    //     target: 'http://localhost:5050',
-    //     changeOrigin: true,
-    //     pathRewrite: {
-    //       [`^/api`]: '/'
-    //     }
-    //   }),
-    // );
     app.enableCors({
-
+      allowedHeaders: 'Set-Cookie',
       credentials: true,
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-      origin: true,
+      origin: process.env.FRONTEND_URL,
     });
     app.use(cookieParser());
     app.useGlobalPipes(
