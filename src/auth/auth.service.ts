@@ -2,7 +2,7 @@ import {
   ForbiddenException,
   HttpException,
   HttpStatus,
-  Injectable,
+  Injectable, UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
@@ -49,6 +49,7 @@ export class AuthService {
   }
 
   async refresh(rt: string) {
+    if(!rt) throw new UnauthorizedException()
     const { id } = this.jwtService.verify(rt, {secret: process.env.RT_SECRET})
     const user = await this.usersService.getUserByIdWithRt(id);
     if (!user || !user.hashedRt) throw new ForbiddenException('ACCESS_DENIED');
@@ -58,12 +59,11 @@ export class AuthService {
     await this.updateRtHash(user.id, tokens.refresh_token);
     return tokens;
   }
-
   private async generateTokens(user: User): Promise<Tokens> {
     const payload = { id: user.id, email: user.email };
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        expiresIn: +process.env.AT_EXPIRE,
+        expiresIn: '10s',
         secret: process.env.AT_SECRET,
       }),
       this.jwtService.signAsync(payload, {

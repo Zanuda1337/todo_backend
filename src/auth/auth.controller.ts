@@ -8,7 +8,6 @@ import {
   Post,
   Put,
   Res,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -20,7 +19,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { RtGuard } from './common/guards';
 import { Cookies, GetCurrentUserId, Public } from './common/decorators';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -92,7 +90,7 @@ export class AuthController {
     summary: 'Обновить refresh_token и получить новую пару токенов',
   })
   @Public()
-  @UseGuards(RtGuard)
+  // @UseGuards(RtGuard)
   @ApiCookieAuth('refresh_token')
   @HttpCode(HttpStatus.OK)
   async refresh(
