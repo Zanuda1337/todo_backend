@@ -1,13 +1,15 @@
 import {
   Body,
-  Controller,
+  Controller, Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param, Patch,
+  Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
@@ -18,6 +20,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './categories.model';
 import { GetCurrentUserId } from '../auth/common/decorators';
 import { UpdateCategoryDto } from './dto/update-category,dto';
+import { DeleteCategoryDto } from './dto/delete-category.dto';
 
 @ApiTags('categories')
 @Controller('/categories')
@@ -52,7 +55,7 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Получить категорию текущего пользователя по id' })
   @ApiResponse({ status: HttpStatus.OK, type: Category })
   @Get('/:id')
-  getOne(@Param('id') id: string, @GetCurrentUserId() currentUserId: string,) {
+  getOne(@Param('id') id: string, @GetCurrentUserId() currentUserId: string) {
     return this.categoryService.getCategoryById(id, currentUserId);
   }
 
@@ -65,5 +68,21 @@ export class CategoriesController {
   @Get()
   getAll(@GetCurrentUserId() currentUserId: string) {
     return this.categoryService.getAll(currentUserId);
+  }
+
+  @ApiBearerAuth('access_token')
+  @ApiOperation({
+    summary: 'Удалить категории по id',
+  })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiBadRequestResponse({
+    description: 'CATEGORIES_DOESNT_EXIST - категории с таким/такими id не существуют',
+  })
+  @Delete()
+  delete(
+    @Body() dto: DeleteCategoryDto,
+    @GetCurrentUserId() currentUserId: string,
+  ) {
+    return this.categoryService.deleteCategories(currentUserId, dto);
   }
 }

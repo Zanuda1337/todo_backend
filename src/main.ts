@@ -13,7 +13,7 @@ const start = async () => {
       allowedHeaders: ['Set-Cookie', 'X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Authorization'],
       credentials: true,
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-      origin: process.env.FRONTEND_URL,
+      origin: true,
     });
     app.use(cookieParser());
     app.useGlobalPipes(
