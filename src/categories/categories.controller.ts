@@ -20,7 +20,6 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './categories.model';
 import { GetCurrentUserId } from '../auth/common/decorators';
 import { UpdateCategoryDto } from './dto/update-category,dto';
-import { DeleteCategoryDto } from './dto/delete-category.dto';
 
 @ApiTags('categories')
 @Controller('/categories')
@@ -76,13 +75,13 @@ export class CategoriesController {
   })
   @ApiResponse({ status: HttpStatus.OK })
   @ApiBadRequestResponse({
-    description: 'CATEGORIES_DOESNT_EXIST - категории с таким/такими id не существуют',
+    description: 'CATEGORY_DOESNT_EXIST - категории с таким id не существуют',
   })
-  @Delete()
+  @Delete('/:id')
   delete(
-    @Body() dto: DeleteCategoryDto,
+    @Param('id') id: string,
     @GetCurrentUserId() currentUserId: string,
   ) {
-    return this.categoryService.deleteCategories(currentUserId, dto);
+    return this.categoryService.deleteCategory(currentUserId, id);
   }
 }

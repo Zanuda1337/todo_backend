@@ -41,7 +41,9 @@ export class UsersService {
     });
   }
   async getUserByEmail(email: string) {
-    return await this.userRepository.findOne({ where: { email } });
+    return await this.userRepository.findOne({
+      where: { email },
+    });
   }
 
   async getUserById(id: string) {
@@ -139,6 +141,14 @@ export class UsersService {
     await this.friendshipRepository.create({
       senderId: myId,
       recipientId: user.id,
+    });
+    return JSON.stringify({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      surname: user.surname,
+      picture: user.picture,
+      status: 'outgoing',
     });
   }
 

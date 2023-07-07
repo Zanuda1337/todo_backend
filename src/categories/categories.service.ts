@@ -6,7 +6,6 @@ import { UserCategories } from './user-categories.model';
 import { Sequelize } from 'sequelize-typescript';
 import { FindAttributeOptions, GroupOption } from 'sequelize';
 import { UpdateCategoryDto } from './dto/update-category,dto';
-import { DeleteCategoryDto } from './dto/delete-category.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -112,10 +111,10 @@ export class CategoriesService {
       order: Sequelize.literal('category.id ASC'),
     });
   }
-  async deleteCategories(userId: string, dto: DeleteCategoryDto) {
-    const categories = await this.userCategoryRepository.findAll({
+  async deleteCategory(userId: string, categoryId: string) {
+    const category = await this.userCategoryRepository.findOne({
       attributes: this.categoryAttrs,
-      where: { categoryId: dto.categoryIds },
+      where: { categoryId: categoryId },
       include: [
         { association: 'category', attributes: [], required: true },
         { association: 'members', attributes: [], required: true },
@@ -126,8 +125,7 @@ export class CategoriesService {
         `bool_or(true) FILTER (WHERE "members"."id"::text = '${userId}')`,
       ),
     });
-    const ids =  categories.map(c => c.id);
-    if(!ids.length) throw new HttpException('CATEGORIES_DOESNT_EXIST', HttpStatus.BAD_REQUEST)
-    await this.categoryRepository.destroy({where: {id: ids}})
+    if(!category) throw new HttpException('CATEGORY_DOESNT_EXIST', HttpStatus.BAD_REQUEST)
+    await this.categoryRepository.destroy({where: {id: category.id}})
   }
 }

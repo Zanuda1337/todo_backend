@@ -47,8 +47,8 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Отправить заявку в друзья' })
   @ApiBearerAuth('access_token')
-  @HttpCode(204)
-  @ApiResponse({ status: 204, description: 'Успешно' })
+  @HttpCode(200)
+  @ApiResponse({ status: 200, description: 'Успешно' })
   @ApiNotFoundResponse({
     description: 'USER_DOESNT_EXIST - пользователь не существует',
   })
