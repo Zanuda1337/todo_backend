@@ -68,11 +68,11 @@ export class UsersController {
     return this.usersService.addRelation(currentUserId, email);
   }
   @ApiOperation({ summary: 'Принять заявку в друзья' })
-  @HttpCode(204)
+  @HttpCode(200)
   @ApiParam({name: 'id'})
   @ApiBearerAuth('access_token')
   @Put('relations/:id')
-  @ApiResponse({ status: 204, description: 'Успешно' })
+  @ApiResponse({ status: 200, description: 'Успешно' })
   @ApiBadRequestResponse({
     description: 'INCORRECT_DATA - некорректные данные',
   })

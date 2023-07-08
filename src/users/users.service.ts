@@ -92,27 +92,25 @@ export class UsersService {
   }
 
   async getUsers(userId: string) {
-    return await this.friendshipRepository.findAll({
-      attributes: {
-        include: [
-          ...this.getWithoutPrefixAttrs([
-            ...this.recipientAttrs,
-            ...this.senderAttrs,
-          ]),
-          [
-            Sequelize.literal(
-              `CASE WHEN "Friendship"."recipientId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' AND "Friendship"."accepted" = false THEN 'pending'WHEN "Friendship"."senderId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' AND "Friendship"."accepted" = false THEN 'outgoing'WHEN "Friendship"."senderId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' OR "Friendship"."recipientId" = '91a75d07-774d-420e-8b57-339f08ab4a2c' AND "Friendship"."accepted" = true THEN 'friends' END`,
-            ),
-            'status',
-          ],
-        ],
-        exclude: ['id', 'recipientId', 'senderId', 'accepted'],
-      },
-      include: {
-        attributes: [],
-        all: true,
-      },
-      raw: true,
+    const users = await this.friendshipRepository.findAll({
+      include: [
+        {
+          attributes: {
+            exclude: [...this.excludedAttrs, 'password', 'hashedRt'],
+          },
+          association: 'recipient',
+          on: Sequelize.literal(
+            '"Friendship"."recipientId" = "recipient"."id"',
+          ),
+        },
+        {
+          attributes: {
+            exclude: [...this.excludedAttrs, 'password', 'hashedRt'],
+          },
+          association: 'sender',
+          on: Sequelize.literal('"Friendship"."senderId" = "sender"."id"'),
+        },
+      ],
       where: [
         {
           [Op.or]: [
@@ -122,6 +120,24 @@ export class UsersService {
         },
       ],
     });
+    return JSON.stringify(users.map((user) => {
+      if(user.senderId === userId) return {
+        id: user.recipient.id,
+        email: user.recipient.email,
+        name: user.recipient.name,
+        surname: user.recipient.surname,
+        picture: user.recipient.picture,
+        status: user.accepted ? 'friends' : 'outgoing',
+      }
+      return {
+        id: user.sender.id,
+        email: user.sender.email,
+        name: user.sender.name,
+        surname: user.sender.surname,
+        picture: user.sender.picture,
+        status: user.accepted ? 'friends' : 'pending',
+      }
+    }), null, 2);
   }
 
   async addRelation(myId: string, email: string) {
@@ -142,14 +158,18 @@ export class UsersService {
       senderId: myId,
       recipientId: user.id,
     });
-    return JSON.stringify({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      surname: user.surname,
-      picture: user.picture,
-      status: 'outgoing',
-    });
+    return JSON.stringify(
+      {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        surname: user.surname,
+        picture: user.picture,
+        status: 'outgoing',
+      },
+      null,
+      2,
+    );
   }
 
   async acceptRelation(myId: string, userId: string) {
@@ -164,6 +184,19 @@ export class UsersService {
       throw new HttpException('ALREADY_FRIENDS', HttpStatus.CONFLICT);
     relation.accepted = true;
     await relation.save();
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    return JSON.stringify(
+      {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        surname: user.surname,
+        picture: user.picture,
+        status: 'friends',
+      },
+      null,
+      2,
+    );
   }
 
   async deleteRelation(myId: string, userId: string) {
