@@ -3,13 +3,14 @@ import {
   BelongsToMany,
   Column,
   DataType,
-  ForeignKey,
+  ForeignKey, HasMany,
   Model,
   Table,
 } from 'sequelize-typescript';
 import { User } from '../users/users.model';
 import { UserCategories } from './user-categories.model';
 import { ApiProperty } from '@nestjs/swagger';
+import { Task } from '../tasks/tasks.model';
 
 interface ICategoryCreationAttrs {
   name: string;
@@ -50,6 +51,9 @@ export class Category extends Model<Category, ICategoryCreationAttrs> {
 
   @BelongsTo(() => User)
   creator: User;
+
+  @HasMany(() => Task )
+  tasks: Task[];
 
   @ApiProperty({
     example: [{

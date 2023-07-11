@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './auth/common/guards';
 import { Friendship } from './users/friendship.model';
+import { Task } from './tasks/tasks.model';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { Friendship } from './users/friendship.model';
       username: process.env.POSTGRES_USERNAME,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
-      models: [User, Category, UserCategories, Friendship],
+      models: [User, Category, UserCategories, Friendship, Task],
       autoLoadModels: true,
       dialectOptions: process.env.CONNECTION_STRING && {
         ssl: {

@@ -13,5 +13,6 @@ import { JwtModule } from '@nestjs/jwt';
   providers: [CategoriesService, CategoriesGateway],
   controllers: [CategoriesController],
   imports: [SequelizeModule.forFeature([Category, User, UserCategories]), UsersModule, JwtModule],
+  exports: [CategoriesService]
 })
 export class CategoriesModule {}
