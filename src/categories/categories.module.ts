@@ -1,18 +1,20 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CategoriesController } from './categories.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Category } from './categories.model';
-import { User } from '../users/users.model';
 import { UserCategories } from './user-categories.model';
-import { UsersModule } from '../users/users.module';
 import { CategoriesGateway } from './categories.gateway';
-import { JwtModule } from '@nestjs/jwt';
+import { TasksModule } from '../tasks/tasks.module';
+import { Category } from './categories.model';
+import { Task } from '../tasks/tasks.model';
 
 @Module({
-  providers: [CategoriesService, CategoriesGateway],
   controllers: [CategoriesController],
-  imports: [SequelizeModule.forFeature([Category, User, UserCategories]), UsersModule, JwtModule],
-  exports: [CategoriesService]
+  providers: [CategoriesService, CategoriesGateway],
+  imports: [
+    SequelizeModule.forFeature([Category, UserCategories, Task]),
+    forwardRef(() => TasksModule),
+  ],
+  exports: [CategoriesService],
 })
 export class CategoriesModule {}

@@ -12,8 +12,8 @@ import { Friendship } from './friendship.model';
   controllers: [UsersController],
   providers: [UsersService],
   imports: [
-    SequelizeModule.forFeature([User, Category, UserCategories, Friendship]),
     forwardRef(() => AuthModule),
+    SequelizeModule.forFeature([User, Category, UserCategories, Friendship]),
   ],
   exports: [UsersService],
 })

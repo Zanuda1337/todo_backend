@@ -8,6 +8,10 @@ import { CategoriesModule } from '../categories/categories.module';
 @Module({
   controllers: [TasksController],
   providers: [TasksService],
-  imports: [forwardRef(() => CategoriesModule), SequelizeModule.forFeature([Task]), ],
+  imports: [
+    SequelizeModule.forFeature([Task]),
+    forwardRef(() => CategoriesModule),
+  ],
+  exports: [TasksService],
 })
 export class TasksModule {}

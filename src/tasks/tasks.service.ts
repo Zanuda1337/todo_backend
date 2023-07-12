@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +15,7 @@ import { UpdateTaskTextDto } from './dto/update-task-text.dto';
 export class TasksService {
   constructor(
     @InjectModel(Task) private tasksRepository: typeof Task,
+    @Inject(forwardRef(() => CategoriesService))
     private categoriesService: CategoriesService,
   ) {}
 
@@ -71,29 +74,30 @@ export class TasksService {
   }
 
   async delete(ids: string, currentUserId: string) {
-    if(!TasksService.isJson(ids)) throw new BadRequestException('SHOULD_BE_JSON_ARRAY');
+    if (!TasksService.isJson(ids))
+      throw new BadRequestException('SHOULD_BE_JSON_ARRAY');
     const normalizedIds: string[] = JSON.parse(ids);
     if (!Array.isArray(normalizedIds))
       throw new BadRequestException('SHOULD_BE_JSON_ARRAY');
     const task = await this.tasksRepository.findOne({
       where: { id: normalizedIds[0] },
     });
-    if(!task) throw new NotFoundException('TASK_DOESNT_EXIST')
+    if (!task) throw new NotFoundException('TASK_DOESNT_EXIST');
     const tasks = await this.getAll(task.categoryId, currentUserId);
     tasks.forEach((item) => {
-      if(!normalizedIds.includes(item.id))
-        throw new NotFoundException('TASK_DOESNT_EXIST')
+      if (!normalizedIds.includes(item.id))
+        throw new NotFoundException('TASK_DOESNT_EXIST');
     });
     await this.tasksRepository.destroy({ where: { id: normalizedIds } });
   }
   private static isJson(item) {
-    let value = typeof item !== "string" ? JSON.stringify(item) : item;
+    let value = typeof item !== 'string' ? JSON.stringify(item) : item;
     try {
       value = JSON.parse(value);
     } catch (e) {
       return false;
     }
 
-    return typeof value === "object" && value !== null;
+    return typeof value === 'object' && value !== null;
   }
 }

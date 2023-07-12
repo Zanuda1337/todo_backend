@@ -1,4 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Category } from './categories.model';
@@ -6,15 +10,20 @@ import { UserCategories } from './user-categories.model';
 import { Sequelize } from 'sequelize-typescript';
 import { FindAttributeOptions, GroupOption } from 'sequelize';
 import { UpdateCategoryDto } from './dto/update-category,dto';
+import { TasksService } from '../tasks/tasks.service';
+import { Task } from '../tasks/tasks.model';
 
 @Injectable()
 export class CategoriesService {
   categoryAttrs: FindAttributeOptions;
   categoryGroup: GroupOption;
   constructor(
+    private tasksService: TasksService,
     @InjectModel(Category) private categoryRepository: typeof Category,
     @InjectModel(UserCategories)
     private userCategoryRepository: typeof UserCategories,
+    @InjectModel(Task)
+    private tasksRepository: typeof Task,
   ) {
     this.categoryAttrs = [
       'category.id',
@@ -80,7 +89,7 @@ export class CategoriesService {
   }
 
   async getCategoryById(id: string, userId: string) {
-    return await this.userCategoryRepository.findOne({
+    const category = await this.userCategoryRepository.findOne({
       attributes: this.categoryAttrs,
       where: { categoryId: id },
       include: [
@@ -94,13 +103,26 @@ export class CategoriesService {
       ),
       order: Sequelize.literal('category.id ASC'),
     });
+    const tasks = await this.tasksRepository.findAll({
+      where: { categoryId: category.id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+    });
+    return {
+      ...category,
+      totalTasks: tasks.length,
+      completedTasks: tasks.filter((t) => t.isCompleted).length,
+    };
   }
 
   async getAll(id: string) {
-    return await this.userCategoryRepository.findAll({
+    const categories = await this.userCategoryRepository.findAll({
       attributes: this.categoryAttrs,
       include: [
-        { association: 'category', attributes: [], required: true },
+        {
+          association: 'category',
+          attributes: [],
+          required: true,
+        },
         { association: 'members', attributes: [], required: true },
       ],
       raw: true,
@@ -109,6 +131,22 @@ export class CategoriesService {
         `bool_or(true) FILTER (WHERE "members"."id"::text = '${id}')`,
       ),
       order: Sequelize.literal('category.id ASC'),
+    });
+    const categoryIds = categories.map((item) => item.id);
+    const tasks = await this.tasksRepository.findAll({
+      where: { categoryId: categoryIds },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+    });
+    return categories.map((category) => {
+      const categoryTasks = tasks?.filter(
+        (task) => task.categoryId === category.id,
+      );
+      const completedTasks = categoryTasks?.filter((task) => task.isCompleted);
+      return {
+        ...category,
+        totalTasks: categoryTasks.length,
+        completedTasks: completedTasks.length,
+      };
     });
   }
   async deleteCategory(userId: string, categoryId: string) {
@@ -125,7 +163,8 @@ export class CategoriesService {
         `bool_or(true) FILTER (WHERE "members"."id"::text = '${userId}')`,
       ),
     });
-    if(!category) throw new HttpException('CATEGORY_DOESNT_EXIST', HttpStatus.BAD_REQUEST)
-    await this.categoryRepository.destroy({where: {id: category.id}})
+    if (!category)
+      throw new HttpException('CATEGORY_DOESNT_EXIST', HttpStatus.BAD_REQUEST);
+    await this.categoryRepository.destroy({ where: { id: category.id } });
   }
 }
