@@ -1,5 +1,6 @@
 import {
-  ApiBearerAuth,
+  ApiBadRequestResponse,
+  ApiBearerAuth, ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -16,10 +17,8 @@ import {
 import { TasksService } from './tasks.service';
 import { GetCurrentUserId } from '../auth/common/decorators';
 import { Task } from './tasks.model';
-import { CreateCategoryDto } from '../categories/dto/create-category.dto';
-import { Category } from '../categories/categories.model';
-import { UpdateCategoryDto } from '../categories/dto/update-category,dto';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskTextDto } from './dto/update-task-text.dto';
 
 @ApiTags('tasks')
 @Controller('/')
@@ -29,6 +28,7 @@ export class TasksController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Получить все задания в категории' })
   @ApiResponse({ status: 200, type: [Task], description: 'Успешно' })
+  @ApiNotFoundResponse({description: 'CATEGORY_DOESNT_EXIST'})
   @ApiBearerAuth('access_token')
   @Get('categories/:id/tasks')
   getTasks(@Param('id') categoryId: string, @GetCurrentUserId() userId: string) {
@@ -46,38 +46,43 @@ export class TasksController {
   ) {
     return this.tasksService.create(dto, currentUserId);
   }
-  // @HttpCode(HttpStatus.OK)
-  // @ApiBearerAuth('access_token')
-  // @ApiOperation({ summary: 'Изменить текст задачи' })
-  // @ApiResponse({ status: HttpStatus.OK, type: Task })
-  // @Put('tasks/:id/text')
-  // updateText(
-  //   @Body() dto: UpdateCategoryDto,
-  //   @GetCurrentUserId() currentUserId: string,
-  // ) {
-  //   // return this.categoryService.update(dto, currentUserId);
-  // }
-  // @HttpCode(HttpStatus.OK)
-  // @ApiBearerAuth('access_token')
-  // @ApiOperation({ summary: 'Изменить статус выполнения задачи' })
-  // @ApiResponse({ status: HttpStatus.OK, type: Task })
-  // @Put('tasks/:id/completed')
-  // updateStatus(
-  //   @Body() dto: UpdateCategoryDto,
-  //   @GetCurrentUserId() currentUserId: string,
-  // ) {
-  //   // return this.categoryService.update(dto, currentUserId);
-  // }
-  //
-  // @HttpCode(HttpStatus.OK)
-  // @ApiBearerAuth('access_token')
-  // @ApiOperation({ summary: 'Удалить задачи' })
-  // @ApiResponse({ status: HttpStatus.OK})
-  // @Delete('tasks/:ids')
-  // delete(
-  //   @Param('ids') ids: string,
-  //   @GetCurrentUserId() currentUserId: string,
-  // ) {
-  //   // return this.categoryService.deleteCategory(currentUserId, id);
-  // }
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access_token')
+  @ApiOperation({ summary: 'Изменить текст задачи' })
+  @ApiResponse({ status: HttpStatus.OK, type: Task })
+  @ApiNotFoundResponse({description: 'TASK_DOESNT_EXIST'})
+  @Put('tasks/:id/text')
+  updateText(
+    @Param('id') taskId: string,
+    @Body() dto: UpdateTaskTextDto,
+    @GetCurrentUserId() currentUserId: string,
+  ) {
+    return this.tasksService.updateText(taskId, dto, currentUserId);
+  }
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access_token')
+  @ApiOperation({ summary: 'Переключить статус выполнения задачи' })
+  @ApiResponse({ status: HttpStatus.OK, type: Task })
+  @ApiNotFoundResponse({description: 'TASK_DOESNT_EXIST'})
+  @Put('tasks/:id/completed')
+  updateStatus(
+    @Param('id') taskId: string,
+    @GetCurrentUserId() currentUserId: string,
+  ) {
+    return this.tasksService.updateStatus(taskId, currentUserId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access_token')
+  @ApiOperation({ summary: 'Удалить задачи' })
+  @ApiResponse({ status: HttpStatus.OK})
+  @ApiBadRequestResponse({description: 'SHOULD_BE_JSON_ARRAY'})
+  @ApiNotFoundResponse({description: 'TASK_DOESNT_EXIST'})
+  @Delete('tasks/:ids')
+  delete(
+    @Param('ids') ids: string,
+    @GetCurrentUserId() currentUserId: string,
+  ) {
+    return this.tasksService.delete(ids,currentUserId);
+  }
 }
