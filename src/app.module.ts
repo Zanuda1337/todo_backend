@@ -17,7 +17,7 @@ import { Task } from './tasks/tasks.model';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.${process.env.NODE_ENV}.env`,
+      envFilePath: process.env.NODE_ENV ? `.${process.env.NODE_ENV}.env` : '.env',
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
